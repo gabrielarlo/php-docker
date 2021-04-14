@@ -1,0 +1,7 @@
+db-data/*
+logs/*
+
+!db-data/README.md
+!logs/README.md
+
+.env

@@ -1,0 +1,56 @@
+version: '3'
+
+networks: 
+  default:
+    driver: bridge
+    name: ${APP_NAME}
+
+services: 
+  app:
+    build: 
+      args: 
+        user: rev365
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: docker_rev365
+    container_name: ${APP_NAME}-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes: 
+      - ./src:/var/www
+    networks: 
+      - default
+
+  db:
+    image: mariadb
+    container_name: ${APP_NAME}-db
+    restart: unless-stopped
+    environment: 
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./db-data:/var/lib/mysql
+    expose: 
+      - ${DB_PORT}
+    networks: 
+      - default
+
+  nginx:
+    image: nginx:latest
+    container_name: ${APP_NAME}-nginx
+    restart: unless-stopped
+    # expose: 
+    #   - 80
+    ports: 
+      - 80:80
+    volumes: 
+      - ./src:/var/www
+      - ./nginx:/etc/nginx/conf.d
+      - ./logs:/var/log/nginx
+    networks: 
+      - default
